@@ -1,22 +1,53 @@
 import React, { useState } from 'react';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { View, Text, StyleSheet, Image, Button, Alert, TextInput } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { create } from 'zustand' ;
 
 import InputField from '@/components/InputField';
 
+type AuthState = {
+  token: string | null;
+  setToken: (token: string) => void;
+}
+
+const useAuthStore = create<AuthState>((set) => ({
+  token: null,
+  setToken: (token) => set({ token })
+}));
+
 
 export default function Inloggen() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const router = useRouter();
+      const setToken = useAuthStore((state) => state.setToken);
+  
+  
+      const handleLogin = async () => {
+          if (!email || !password) {
+              Alert.alert("Foutmelding", "Je hebt nog niet alle velden ingevuld.");
+              return;
+          }
+        
+        try {
+          const response = await fetch('', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({email, password}),
+          });
+          
+          const data = await response.json();
+          setToken(data.token);
+          router.push('/(main)/dashboard');
+        } 
 
-
-    const handlelogin = async () => {
-        if (!email || !password) {
-            Alert.alert("Fout", "Vul alle velden in");
-            return;
+        catch (error) {
+          Alert.alert("Fout", "Kon geen verbinding maken met de server");
         }
-    };
+    }
 
     return(
         <SafeAreaProvider >
@@ -29,14 +60,12 @@ export default function Inloggen() {
             <Text style={styles.baseText}>Log hier in met je account</Text>
             
             <View>
-                <TextInput 
-                    style={styles.inputField} 
+                <InputField
                     placeholder="Email" 
                     value={email} 
                     onChangeText={setEmail} 
                 />
-                <TextInput 
-                    style={styles.inputField} 
+                <InputField
                     placeholder="Wachtwoord" 
                     value={password} 
                     secureTextEntry={true} 
@@ -45,7 +74,7 @@ export default function Inloggen() {
             </View>
 
             <Button
-            onPress={handlelogin}
+            onPress={handleLogin}
             title="Inloggen"
             />
 
