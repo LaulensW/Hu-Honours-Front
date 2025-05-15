@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import { SafeAreaView, Text, ScrollView, View } from "react-native";
 import Level from "../../components/dashboard/Level";
